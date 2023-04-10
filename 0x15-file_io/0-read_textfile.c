@@ -1,54 +1,29 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "main.h"
+#include <stdlib.h>
+
+/**
+ * read_textfile- Read text file print to STDOUT.
+ * @filename: text file being read
+ * @letters: number of letters to be read
+ * Return: n- actual number of bytes read and printed
+ *        0 when function fails or filename is NULL.
+ */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-	if (filename == NULL)
-	{
-	return (0);
-	}
+	char *buf;
+	ssize_t fd;
+	ssize_t n;
+	ssize_t t;
 
-	FILE *file = fopen(filename, "r");
+	fd = open(filename, O_RDONLY);
+	if (fd == -1)
+		return (0);
+	buf = malloc(sizeof(char) * letters);
+	t = read(fd, buf, letters);
+	n = write(STDOUT_FILENO, buf, t);
 
-	if (file == NULL)
-	{
-	return (0);
-	}
-
-	char *buffer = (char *) malloc(sizeof(char) * letters);
-
-	if (buffer == NULL)
-	{
-	fclose(file);
-	return (0);
-	}
-
-	size_t n = fread(buffer, sizeof(char), letters, file);
-
-	if (n == 0)
-	{
-	free(buffer);
-	fclose(file);
-	return (0);
-	}
-
-	size_t written = 0;
-
-	while (written < n)
-	{
-	ssize_t bytes_written = write(STDOUT_FILENO, buffer + written, n - written);
-
-	if (bytes_written <= 0)
-	{
-	free(buffer);
-	fclose(file);
-return (0);
-	}
-written += bytes_written;
-}
-free(buffer);
-fclose(file);
-return (n);
+	free(buf);
+	close(fd);
+	return (n);
 }
 
